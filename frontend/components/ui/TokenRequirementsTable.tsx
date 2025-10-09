@@ -11,6 +11,7 @@ import styled from 'styled-components';
 
 import { Table } from '@/components/ui/Table';
 import { COLOR } from '@/constants/colors';
+import { formatNumber } from '@/utils';
 
 const LOCALE = {
   emptyText: 'No token requirements',
@@ -74,31 +75,31 @@ const columns: TableColumnsType<TokenRowData> = [
         >
           {record.areFundsReceived
             ? 'No pending amount'
-            : `Pending ${record.pendingAmount}`}
+            : `Pending ${formatNumber(record.pendingAmount, 4)}`}
         </CustomTag>
       );
     },
   },
-];
+] as const;
+
+type TokenRequirementsTableProps = {
+  isLoading?: boolean;
+  tokensDataSource: TokenRowData[];
+  locale?: TableLocale;
+};
 
 export const TokenRequirementsTable = ({
   isLoading,
-  tableData,
+  tokensDataSource,
   locale = LOCALE,
-}: {
-  isLoading: boolean;
-  tableData: TokenRowData[];
-  locale?: TableLocale;
-}) => {
-  return (
-    <Table<TokenRowData>
-      dataSource={isLoading ? [] : tableData}
-      columns={columns}
-      loading={isLoading}
-      pagination={false}
-      locale={locale}
-      className="mt-32"
-      rowKey={(record) => record.symbol}
-    />
-  );
-};
+}: TokenRequirementsTableProps) => (
+  <Table<TokenRowData>
+    dataSource={isLoading ? [] : tokensDataSource}
+    columns={columns}
+    loading={isLoading}
+    pagination={false}
+    locale={locale}
+    className="mt-32"
+    rowKey={(record) => record.symbol}
+  />
+);

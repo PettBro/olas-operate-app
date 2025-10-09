@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import { SendFundAction } from '@/components/Bridge/types';
 import { COLOR } from '@/constants/colors';
-import { useUsdAmounts } from '@/hooks/useUsdAmounts';
 
 const { Text } = Typography;
 
@@ -77,11 +76,6 @@ type TokenRequirementsProps = {
   fundType: SendFundAction;
 };
 
-const getUsdAmount = (
-  symbol: string,
-  breakdown: ReturnType<typeof useUsdAmounts>['breakdown'],
-) => breakdown.find((b) => b.symbol === symbol)?.usdAmount.toFixed(2);
-
 export const TokenRequirements = ({
   tokenRequirements = [],
   fiatAmount,
@@ -89,12 +83,7 @@ export const TokenRequirements = ({
   isLoading,
   fundType,
 }: TokenRequirementsProps) => {
-  const { breakdown, isLoading: isUsdAmountsLoading } = useUsdAmounts(
-    chainName!,
-    tokenRequirements,
-  );
-
-  if (isLoading || isUsdAmountsLoading) return <RequirementsSkeleton />;
+  if (isLoading) return <RequirementsSkeleton />;
 
   if (fundType === 'onRamp')
     return <RequirementsForOnRamp fiatAmount={fiatAmount?.toFixed(2) ?? '0'} />;
@@ -107,18 +96,9 @@ export const TokenRequirements = ({
       <RequirementsContainer gap={12}>
         {tokenRequirements.map(({ amount, symbol, iconSrc }) => (
           <Flex key={symbol} align="center" gap={8} style={{ width: '100%' }}>
-            <Image
-              src={iconSrc}
-              alt={symbol}
-              style={{
-                height: 20,
-              }}
-            />
+            <Image src={iconSrc} alt={symbol} style={{ height: 20 }} />
             <Text>
               {formatAmount(amount)} {symbol}
-            </Text>
-            <Text className="text-neutral-tertiary">
-              (${getUsdAmount(symbol, breakdown)})
             </Text>
           </Flex>
         ))}

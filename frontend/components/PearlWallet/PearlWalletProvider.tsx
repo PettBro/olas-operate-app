@@ -1,4 +1,4 @@
-import { compact, sum } from 'lodash';
+import { compact } from 'lodash';
 import {
   createContext,
   ReactNode,
@@ -14,40 +14,53 @@ import { AgentType } from '@/constants/agent';
 import { type EvmChainName } from '@/constants/chains';
 import { EvmChainId } from '@/constants/chains';
 import { TokenSymbol } from '@/constants/token';
-import { useBalanceContext, useService, useServices } from '@/hooks';
+import {
+  useBalanceContext,
+  useMasterWalletContext,
+  useService,
+  useServices,
+} from '@/hooks';
 import { useAvailableAssets } from '@/hooks/useAvailableAssets';
+import { Address } from '@/types/Address';
 import { AgentConfig } from '@/types/Agent';
 import { Nullable, ValueOf } from '@/types/Util';
 import { AvailableAsset, StakedAsset } from '@/types/Wallet';
 import { generateName } from '@/utils/agentName';
 
-import { STEPS, WalletChain } from './Withdraw/types';
+import { STEPS, TokenAmounts, WalletChain } from './types';
 
 const PearlWalletContext = createContext<{
   walletStep: ValueOf<typeof STEPS>;
   updateStep: (newStep: ValueOf<typeof STEPS>) => void;
   isLoading: boolean;
-  aggregatedBalance: Nullable<number>;
   chains: WalletChain[];
+  masterSafeAddress: Nullable<Address>;
   walletChainId: Nullable<EvmChainId>;
-  onWalletChainChange?: (chainId: EvmChainId) => void;
+  onWalletChainChange: (
+    chainId: EvmChainId,
+    options?: { canNavigateOnReset?: boolean },
+  ) => void;
   availableAssets: AvailableAsset[];
   stakedAssets: StakedAsset[];
-  amountsToWithdraw: Partial<Record<TokenSymbol, number>>;
+  amountsToWithdraw: TokenAmounts;
   onAmountChange: (symbol: TokenSymbol, amount: number) => void;
+  amountsToDeposit: TokenAmounts;
+  onDepositAmountChange: (symbol: TokenSymbol, amount: number) => void;
   onReset: () => void;
 }>({
   walletStep: STEPS.PEARL_WALLET_SCREEN,
   updateStep: () => {},
   isLoading: false,
-  aggregatedBalance: null,
   walletChainId: null,
+  masterSafeAddress: null,
   onWalletChainChange: () => {},
   chains: [],
   stakedAssets: [],
   availableAssets: [],
   amountsToWithdraw: {},
   onAmountChange: () => {},
+  amountsToDeposit: {},
+  onDepositAmountChange: () => {},
   onReset: () => {},
 });
 
@@ -63,6 +76,7 @@ export const PearlWalletProvider = ({ children }: { children: ReactNode }) => {
   );
   const { isLoading: isBalanceLoading, getTotalStakedOlasBalanceOf } =
     useBalanceContext();
+  const { masterSafes } = useMasterWalletContext();
 
   const [walletStep, setWalletStep] = useState<ValueOf<typeof STEPS>>(
     STEPS.PEARL_WALLET_SCREEN,
@@ -70,9 +84,8 @@ export const PearlWalletProvider = ({ children }: { children: ReactNode }) => {
   const [walletChainId, setWalletChainId] = useState<EvmChainId>(
     selectedAgentConfig.evmHomeChainId,
   );
-  const [amountsToWithdraw, setAmountsToWithdraw] = useState<
-    Partial<Record<TokenSymbol, number>>
-  >({});
+  const [amountsToWithdraw, setAmountsToWithdraw] = useState<TokenAmounts>({});
+  const [amountsToDeposit, setAmountsToDeposit] = useState<TokenAmounts>({});
   const { isLoading: isAvailableAssetsLoading, availableAssets } =
     useAvailableAssets(walletChainId);
 
@@ -102,10 +115,6 @@ export const PearlWalletProvider = ({ children }: { children: ReactNode }) => {
     );
   }, [services]);
 
-  const aggregatedBalance = useMemo(() => {
-    return sum(availableAssets.map(({ valueInUsd }) => valueInUsd));
-  }, [availableAssets]);
-
   // staked OLAS
   const stakedAssets: StakedAsset[] = useMemo(
     () => [
@@ -132,17 +141,35 @@ export const PearlWalletProvider = ({ children }: { children: ReactNode }) => {
     setAmountsToWithdraw((prev) => ({ ...prev, [symbol]: amount }));
   }, []);
 
-  const onReset = useCallback(() => {
-    setWalletStep(STEPS.PEARL_WALLET_SCREEN);
+  const onDepositAmountChange = useCallback(
+    (symbol: TokenSymbol, amount: number) => {
+      setAmountsToDeposit((prev) => ({ ...prev, [symbol]: amount }));
+    },
+    [],
+  );
+
+  const onReset = useCallback((canNavigateOnReset?: boolean) => {
     setAmountsToWithdraw({});
+    setAmountsToDeposit({});
+
+    if (canNavigateOnReset) {
+      setWalletStep(STEPS.PEARL_WALLET_SCREEN);
+    }
   }, []);
 
   const onWalletChainChange = useCallback(
-    (chainId: EvmChainId) => {
+    (chainId: EvmChainId, options?: { canNavigateOnReset?: boolean }) => {
       setWalletChainId(chainId);
-      onReset();
+      onReset(options?.canNavigateOnReset);
     },
     [onReset],
+  );
+
+  const masterSafeAddress = useMemo(
+    () =>
+      masterSafes?.find((safe) => safe.evmChainId === walletChainId)?.address ??
+      null,
+    [masterSafes, walletChainId],
   );
 
   const isLoading =
@@ -154,17 +181,25 @@ export const PearlWalletProvider = ({ children }: { children: ReactNode }) => {
   return (
     <PearlWalletContext.Provider
       value={{
+        isLoading,
         walletStep,
         updateStep,
-        isLoading,
-        aggregatedBalance,
+        availableAssets,
+        stakedAssets,
+        masterSafeAddress,
+
+        // for chain
         walletChainId,
         onWalletChainChange,
         chains,
-        availableAssets,
-        stakedAssets,
+
+        // for withdraw
         amountsToWithdraw,
         onAmountChange,
+
+        // for deposit
+        amountsToDeposit,
+        onDepositAmountChange,
         onReset,
       }}
     >

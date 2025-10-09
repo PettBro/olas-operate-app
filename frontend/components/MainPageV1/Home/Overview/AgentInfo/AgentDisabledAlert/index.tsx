@@ -1,11 +1,13 @@
-import { useMasterBalances } from '@/hooks/useBalanceContext';
-import { useNeedsFunds } from '@/hooks/useNeedsFunds';
-import { useServices } from '@/hooks/useServices';
-import { useActiveStakingContractDetails } from '@/hooks/useStakingContractDetails';
-import { useStakingProgram } from '@/hooks/useStakingProgram';
+import {
+  useActiveStakingContractDetails,
+  useNeedsFunds,
+  useServices,
+  useStakingProgram,
+} from '@/hooks';
 
 import { EvictedAlert } from './EvictedAlert';
-import { LowBalanceAlert } from './LowBalanceAlert';
+import { LowAgentBalanceAlert } from './LowAgentBalanceAlert';
+import { LowPearlBalanceAlert } from './LowPearlBalanceAlert';
 import { NoSlotsAvailableAlert } from './NoSlotsAvailableAlert';
 import { UnderConstructionAlert } from './UnderConstructionAlert';
 import { UnfinishedSetupAlert } from './UnfinishedSetupAlert';
@@ -19,17 +21,15 @@ export const AgentDisabledAlert = () => {
     hasEnoughServiceSlots,
     isServiceStaked,
   } = useActiveStakingContractDetails();
-  const { isMasterEoaLowOnGas, isMasterSafeLowOnNativeGas } =
-    useMasterBalances();
   const { selectedStakingProgramId } = useStakingProgram();
   const { isInitialFunded } = useNeedsFunds(selectedStakingProgramId);
-
-  // The "store" is `undefined` during updates, hence waiting till we get the correct value from the store.
-  if (isInitialFunded === false) return <UnfinishedSetupAlert />;
 
   if (selectedAgentConfig.isUnderConstruction) {
     return <UnderConstructionAlert />;
   }
+
+  // The "store" is `undefined` during updates, hence waiting till we get the correct value from the store.
+  if (isInitialFunded === false) return <UnfinishedSetupAlert />;
 
   if (
     !isSelectedStakingContractDetailsLoading &&
@@ -41,10 +41,11 @@ export const AgentDisabledAlert = () => {
 
   if (isAgentEvicted && !isEligibleForStaking) return <EvictedAlert />;
 
-  // TODO: verify how this should be handled, new funding job is currently under discussion
-  if (isMasterEoaLowOnGas || isMasterSafeLowOnNativeGas) {
-    return <LowBalanceAlert />;
-  }
-
-  return null;
+  // Render low-balance alerts. Each component controls its own visibility
+  return (
+    <>
+      <LowPearlBalanceAlert />
+      <LowAgentBalanceAlert />
+    </>
+  );
 };

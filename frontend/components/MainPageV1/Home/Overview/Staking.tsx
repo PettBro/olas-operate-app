@@ -1,6 +1,7 @@
-import { Alert, Button, Flex, Skeleton, Statistic, Typography } from 'antd';
+import { Button, Flex, Skeleton, Statistic, Typography } from 'antd';
 import { useMemo } from 'react';
 
+import { CustomAlert } from '@/components/Alert';
 import { Clock } from '@/components/custom-icons/Clock';
 import { FireNoStreak } from '@/components/custom-icons/FireNoStreak';
 import { FireV1 } from '@/components/custom-icons/FireV1';
@@ -16,19 +17,33 @@ import { useStakingDetails } from '@/hooks/useStakingDetails';
 const { Text, Title } = Typography;
 const { Countdown } = Statistic;
 
+const UnderConstructionAlert = () => (
+  <CustomAlert
+    message="The agent is under construction and cannot participate in staking until further notice."
+    type="warning"
+    centered
+    showIcon
+    className="text-sm"
+  />
+);
+
 const EvictionAlert = () => (
-  <Alert
+  <CustomAlert
     message="The agent is evicted and cannot participate in staking until the eviction period ends."
     type="warning"
+    centered
     showIcon
+    className="text-sm"
   />
 );
 
 const RunAgentAlert = () => (
-  <Alert
+  <CustomAlert
     message="Start the agent to join staking and unlock protocol rewards."
     type="info"
+    centered
     showIcon
+    className="text-sm"
   />
 );
 
@@ -64,16 +79,21 @@ export const Staking = () => {
   const { currentEpochLifetime } = useStakingDetails();
   const { selectedAgentConfig } = useServices();
 
+  const { isUnderConstruction } = selectedAgentConfig;
+
   const alert = useMemo(() => {
+    if (isUnderConstruction) return <UnderConstructionAlert />;
     if (isAgentEvicted) return <EvictionAlert />;
     if (!isServiceRunning) return <RunAgentAlert />;
     return null;
-  }, [isAgentEvicted, isServiceRunning]);
+  }, [isAgentEvicted, isServiceRunning, isUnderConstruction]);
 
   return (
     <Flex vertical>
       <Flex justify="space-between" align="center">
-        <Title level={4}>Staking</Title>
+        <Title level={5} className="mt-0 mb-12">
+          Staking
+        </Title>
         {!selectedAgentConfig?.isUnderConstruction && (
           <Button size="small" onClick={() => goto(Pages.AgentStaking)}>
             Manage Staking
@@ -85,8 +105,10 @@ export const Staking = () => {
         <Flex vertical gap={24}>
           {alert}
           <Flex flex={1}>
-            <Flex flex={1} vertical gap={4}>
-              <Text type="secondary">Current Epoch lifetime</Text>
+            <Flex flex={1} vertical gap={8}>
+              <Text className="text-neutral-secondary">
+                Current Epoch lifetime
+              </Text>
               <Flex align="center" gap={8}>
                 <Clock />
                 {currentEpochLifetime ? (
@@ -99,8 +121,8 @@ export const Staking = () => {
                 )}
               </Flex>
             </Flex>
-            <Flex flex={1} vertical gap={4}>
-              <Text type="secondary">Streak</Text>
+            <Flex flex={1} vertical gap={8}>
+              <Text className="text-neutral-secondary">Streak</Text>
               <Streak />
             </Flex>
           </Flex>

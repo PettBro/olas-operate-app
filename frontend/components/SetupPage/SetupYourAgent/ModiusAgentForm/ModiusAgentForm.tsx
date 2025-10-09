@@ -5,9 +5,8 @@ import { useUnmount } from 'usehooks-ts';
 import { ServiceTemplate } from '@/client';
 import { RequiredMark } from '@/components/ui/RequiredMark';
 import { SetupScreen } from '@/enums/SetupScreen';
-import { useSetup } from '@/hooks/useSetup';
-import { useStakingProgram } from '@/hooks/useStakingProgram';
-import { onDummyServiceCreation } from '@/utils/service';
+import { useSetup, useStakingProgram } from '@/hooks';
+import { onDummyServiceCreation } from '@/utils';
 
 import {
   BABYDEGEN_FORM_STEP,
@@ -203,7 +202,7 @@ export const ModiusAgentFormContent = ({
         >
           <Input />
         </Form.Item>
-        {isTenderlyStep && <div style={{ paddingBottom: 42 }} />}
+        {isTenderlyStep && <div style={{ paddingBottom: 16 }} />}
 
         {isCoinGeckoStep && <CoinGeckoApiKeySubHeader isSetupPage />}
         <Form.Item
@@ -215,7 +214,7 @@ export const ModiusAgentFormContent = ({
         >
           <Input.Password />
         </Form.Item>
-        {isCoinGeckoStep && <div style={{ paddingBottom: 42 }} />}
+        {isCoinGeckoStep && <div style={{ paddingBottom: 16 }} />}
 
         {isGeminiStep && <GeminiApiKeySubHeader name="Modius" isSetupPage />}
         <Form.Item
@@ -229,6 +228,7 @@ export const ModiusAgentFormContent = ({
         {geminiApiKeyValidationStatus === 'invalid' && (
           <InvalidGeminiApiCredentials />
         )}
+        {isGeminiStep && <div style={{ paddingBottom: 16 }} />}
 
         <Form.Item>
           <Button

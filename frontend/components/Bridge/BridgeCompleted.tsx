@@ -1,11 +1,12 @@
 import { Button, Flex, Result, Typography } from 'antd';
 
-import { BridgeTransferFlow } from '@/components/Bridge/BridgeTransferFlow';
 import { GoToMainPageButton } from '@/components/Pages/GoToMainPageButton';
-import { CardFlex } from '@/components/ui/CardFlex';
+import { CardFlex } from '@/components/ui';
 import { Pages } from '@/enums/Pages';
-import { usePageState } from '@/hooks/usePageState';
+import { usePageState } from '@/hooks';
 import { CrossChainTransferDetails } from '@/types/Bridge';
+
+import { BridgeTransferFlow } from './BridgeTransferFlow';
 
 const { Title } = Typography;
 
@@ -26,7 +27,7 @@ export const BridgeCompleted = ({
   const { goto } = usePageState();
 
   return (
-    <Flex justify="center" className="pt-48">
+    <Flex justify="center">
       <CardFlex $noBorder $onboarding className="p-8">
         <Flex justify="space-between" align="center">
           <Title level={3} className="mt-12">

@@ -9,13 +9,19 @@ import { formatNumber } from '@/utils/numberFormatters';
 
 const { Text } = Typography;
 
-type TokenAmountInputProps = {
-  value: number;
-  totalAmountInUsd: number;
-  totalAmount: number;
-  onChange: (value: number | null) => void;
-  tokenSymbol: TokenSymbol;
-};
+const Container = styled.div<{ $hasError?: boolean }>`
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid
+    ${({ $hasError }) =>
+      $hasError ? COLOR.TEXT_COLOR.ERROR.DEFAULT : COLOR.GRAY_4};
+  background-color: ${COLOR.BACKGROUND};
+  .input-wrapper {
+    padding: 16px 20px;
+    border-radius: 16px;
+    background-color: ${COLOR.WHITE};
+  }
+`;
 
 const TokenImage = ({ tokenSymbol }: { tokenSymbol: TokenSymbol }) => (
   <Flex gap={8} align="center">
@@ -29,26 +35,30 @@ const TokenImage = ({ tokenSymbol }: { tokenSymbol: TokenSymbol }) => (
   </Flex>
 );
 
-const Container = styled.div`
-  width: 100%;
-  border-radius: 16px;
-  border: 1px solid ${COLOR.GRAY_4};
-  background-color: ${COLOR.BACKGROUND};
-  .input-wrapper {
-    padding: 16px 20px;
-    border-radius: 16px;
-    background-color: ${COLOR.WHITE};
-  }
-`;
+type TokenAmountInputProps = {
+  value: number;
+  /** Maximum amount that can be entered */
+  maxAmount?: number;
+  /** Total amount available (for display only) */
+  totalAmount: number;
+  onChange: (value: number | null) => void;
+  tokenSymbol: TokenSymbol;
+  /** Whether to show quick select buttons (10%, 25%, 50%, 100%) */
+  showQuickSelects?: boolean;
+  /** Whether the input has an error */
+  hasError?: boolean;
+};
 
 export const TokenAmountInput = ({
-  totalAmountInUsd,
-  totalAmount,
   value,
+  maxAmount,
+  totalAmount,
   onChange,
   tokenSymbol,
+  showQuickSelects = true,
+  hasError = false,
 }: TokenAmountInputProps) => (
-  <Container>
+  <Container $hasError={hasError}>
     <Flex
       className="input-wrapper"
       gap={12}
@@ -59,7 +69,7 @@ export const TokenAmountInput = ({
         onChange={onChange}
         value={value}
         min={0}
-        max={totalAmount}
+        max={maxAmount}
         variant="borderless"
         size="large"
         controls={false}
@@ -69,16 +79,19 @@ export const TokenAmountInput = ({
     </Flex>
 
     <Flex
-      className="token-value-and-helper"
+      className="token-value-and-helper w-full"
       justify="space-between"
       align="center"
       style={{ padding: '10px 20px' }}
     >
-      <Text className="text-sm leading-normal text-neutral-tertiary">
-        {totalAmountInUsd ? `≈ $${formatNumber(totalAmountInUsd, 4)}` : null}
-      </Text>
+      <Flex gap={6} align="center">
+        <WalletOutlined width={20} height={20} />
+        <Text className="text-sm leading-normal text-neutral-tertiary">
+          {formatNumber(totalAmount, 4)}
+        </Text>
+      </Flex>
 
-      <Flex align="center" gap={24}>
+      {showQuickSelects && (
         <Flex gap={8} align="center">
           {[10, 25, 50, 100].map((percentage) => (
             <Button
@@ -95,13 +108,7 @@ export const TokenAmountInput = ({
             </Button>
           ))}
         </Flex>
-        <Flex gap={6} align="center">
-          <WalletOutlined width={20} height={20} />
-          <Text className="text-sm leading-normal text-neutral-tertiary">
-            {formatNumber(totalAmount, 4)}
-          </Text>
-        </Flex>
-      </Flex>
+      )}
     </Flex>
   </Container>
 );

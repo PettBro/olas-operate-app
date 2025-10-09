@@ -2,21 +2,19 @@ import { Flex, Typography } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { CustomAlert } from '@/components/Alert';
-import {
-  BridgingSteps,
-  StepEvent,
-} from '@/components/Bridge/BridgeInProgress/BridgingSteps';
-import { BridgeTransferFlow } from '@/components/Bridge/BridgeTransferFlow';
-import { AgentSetupCompleteModal } from '@/components/ui/AgentSetupCompleteModal';
-import { CardFlex } from '@/components/ui/CardFlex';
+import { AgentSetupCompleteModal, CardFlex } from '@/components/ui';
 import { Pages } from '@/enums/Pages';
-import { useBridgingSteps } from '@/hooks/useBridgingSteps';
-import { useMasterSafeCreationAndTransfer } from '@/hooks/useMasterSafeCreationAndTransfer';
-import { usePageState } from '@/hooks/usePageState';
+import {
+  useBridgingSteps,
+  useMasterSafeCreationAndTransfer,
+  usePageState,
+} from '@/hooks';
 import { BridgingStepStatus, CrossChainTransferDetails } from '@/types/Bridge';
 import { Nullable } from '@/types/Util';
 
+import { BridgeTransferFlow } from '../BridgeTransferFlow';
 import { BridgeRetryOutcome, EnabledSteps } from '../types';
+import { BridgingSteps, StepEvent } from './BridgingSteps';
 import { useRetryBridge } from './useRetryBridge';
 
 const { Text, Title } = Typography;
@@ -280,7 +278,7 @@ export const BridgeInProgress = ({
   }, [eta]);
 
   return (
-    <Flex justify="center" className="pt-48">
+    <Flex justify="center">
       <CardFlex $noBorder $onboarding className="p-8">
         <Title level={3} className="mt-0">
           Bridge Crypto

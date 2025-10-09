@@ -44,13 +44,13 @@ export const SelectAmountToWithdraw = ({
         <PearlWalletToExternalWallet />
 
         <Flex justify="space-between" align="center" vertical gap={16}>
-          {availableAssets.map(({ amount, valueInUsd, symbol }) => (
+          {availableAssets.map(({ amount, symbol }) => (
             <TokenAmountInput
               key={symbol}
               tokenSymbol={symbol}
               value={amountsToWithdraw?.[symbol] ?? 0}
+              maxAmount={amount}
               totalAmount={amount}
-              totalAmountInUsd={valueInUsd}
               onChange={(x) => onAmountChange(symbol, x ?? 0)}
             />
           ))}

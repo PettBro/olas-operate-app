@@ -22,6 +22,8 @@ export const mainTheme: ThemeConfig = {
   components: {
     Alert: {
       fontSize: 16,
+      colorIcon: COLOR.TEXT_NEUTRAL_PRIMARY,
+      fontSizeIcon: 16,
     },
     Button: {
       contentFontSizeSM: 14,
@@ -62,6 +64,9 @@ export const mainTheme: ThemeConfig = {
     },
     Menu: {
       activeBarBorderWidth: 0,
+      itemSelectedBg: COLOR.GRAY_1,
+      itemHoverBg: COLOR.GRAY_1,
+      itemSelectedColor: COLOR.TEXT_NEUTRAL_PRIMARY,
     },
     Tooltip: {
       fontSize: 16,
@@ -72,6 +77,7 @@ export const mainTheme: ThemeConfig = {
     Typography: {
       colorTextHeading: COLOR.TEXT_NEUTRAL_PRIMARY,
       colorTextDescription: COLOR.TEXT_NEUTRAL_SECONDARY,
+      colorError: COLOR.TEXT_COLOR.ERROR.DEFAULT,
     },
     Popover: {
       fontSize: 14,
@@ -86,6 +92,11 @@ export const mainTheme: ThemeConfig = {
     },
     Layout: {
       bodyBg: COLOR.BACKGROUND,
+    },
+    Select: {
+      colorBgContainer: COLOR.BACKGROUND,
+      fontSizeLG: 16,
+      optionPadding: 8,
     },
     Steps: {
       fontSize: 16,
@@ -111,6 +122,3 @@ export const mainTheme: ThemeConfig = {
     },
   },
 };
-
-// TODO: consolidate theme into mainTheme
-export const LOCAL_FORM_THEME = { components: { Input: { fontSize: 16 } } };
